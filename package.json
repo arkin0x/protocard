@@ -1,0 +1,13 @@
+{
+  "name": "protocard",
+  "version": "1.0.0",
+  "main": "index.html",
+  "author": "arkin0x <arkinox@pm.me>",
+  "license": "MIT",
+  "dependencies": {
+    "live-server": "^1.2.2"
+  },
+  "scripts": {
+    "start": "live-server ."
+  }
+}
