@@ -1,5 +1,8 @@
 // protocard
 
+const STACK_OFFSET_X = 5
+const STACK_OFFSET_Y = 5
+
 // canvas
 $cv = document.getElementById('cv')
 $ctx = $cv.getContext('2d')
@@ -26,17 +29,11 @@ const updateMouseUp = (e) => {
 	mouse.down = false 
 }
 
-const handleDrag = (e) => {
-	// detect hit on existing
-	// highest card selected
-	detectHit(cards).reverse()[0]?.drag()
-}
-
-const detectHit = arr => arr.filter( el => 
-	mouse.x >= el.x &&
-	mouse.x <= el.x + el.w && 
-	mouse.y >= el.y &&
-	mouse.y <= el.y + el.h
+const detectHit = (target,arr) => arr.filter( el => 
+	target.x >= el.x &&
+	target.x <= el.x + el.w && 
+	target.y >= el.y &&
+	target.y <= el.y + el.h
 )
 
 document.onmousemove = updateMouse
@@ -85,7 +82,7 @@ const cls = () => {
 const checkMouse = () => {
 	if(mouse.down && !mouse.drag){
 		// clicking
-		let card = detectHit(cards).reverse()[0]
+		let card = detectHit(mouse,cards).reverse()[0]
 		if(card && mouse.ready){
 			mouse.drag = card
 			mouse.ready = false
@@ -113,6 +110,17 @@ const checkMouse = () => {
 			// stop dragging
 			mouse.drag = false 
 			console.log('✋drop')
+			// check if we made a new stack
+			let stackedOn = detectHit(card.centroid(),cards.filter(c => c !== card))[0]
+			console.log(stackedOn)
+			// debugger
+			if(stackedOn){
+				if(!stackedOn.stack) stackedOn.stack = new Stack(stackedOn)
+				if(card.stack){
+					card.stack.remove(card)
+				}
+				stackedOn.stack.add(card)
+			}
 		}
 	} else if(!mouse.down & !mouse.drag){
 		mouse.ready = true
@@ -176,10 +184,37 @@ class Card {
 		Object.keys(opts).forEach(k => this[k] = opts[k])
 		cards.push(this)
 	}
-	click(){
-		console.log(this)
+	/**
+	 * 
+	 * @returns center point of card
+	 */
+	centroid(){
+		let x = (this.x + this.x + this.w)/2
+		let y = (this.y + this.y + this.h)/2
+		return {x,y}
 	}
 }
 
-new Card({x:0,y:0})
-new Card({x:100,y:0})
+class Stack {
+	constructor(card){
+		this.x = card.x
+		this.y = card.y
+		this.height = 1
+		// Object.keys(opts).forEach(k => this[k] = opts[k])
+	}
+	add(card){
+		card.stack = this
+		card.x = this.x + STACK_OFFSET_X * this.height
+		card.y = this.y + STACK_OFFSET_Y * this.height
+		this.height++
+	}
+	remove(card){
+		card.stack = null
+	}
+}
+
+//---
+
+new Card({x:10,y:10})
+new Card({x:110,y:10})
+new Card({x:210,y:10})
