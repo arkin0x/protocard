@@ -9,9 +9,10 @@
 }
 
 html, body {
+	background-color: #333;
 	overflow: hidden;
 }
 
 canvas {
-	/* background-color: #fff; */
+	background-color: #333;
 }
