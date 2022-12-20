@@ -240,6 +240,7 @@ class Layout {
 			topClick.drag=true
 			topClick.xoffset = mouse.x - topClick.x
 			topClick.yoffset = mouse.y - topClick.y
+			// TODO bring the dragged card to the top of the deck
 		}
 
 		// do upkeep
