@@ -12,23 +12,34 @@ const resizeWindow = function(){
 	$cv.height = window.innerHeight
 	$cv.width = window.innerWidth
 }
-resizeWindow()
+resizeWindow()//trigger initial resize
 window.addEventListener('resize',resizeWindow)
 
 // track mouse position
-const updateMouse = (e) => {
+const updateMousePos = (e) => {
 	mouse.x = e.pageX
 	mouse.y = e.pageY
 	// console.log(mouse.x, mouse.y)
 }
 const updateMouseDown = (e) => {
 	mouse.down = true
-	mouse.click++
+	mouse.clickX = mouse.x 
+	mouse.clickY = mouse.y 
+	mouse.clickdown++
 }
 const updateMouseUp = (e) => {
-	mouse.down = false 
+	mouse.down = false
+	mouse.dragXDist = mouse.clickX - mouse.x 
+	mouse.dragYDist = mouse.clickY - mouse.y 
+	mouse.clickup++
 }
 
+/**
+	* 
+	* @param {GameObject} target - GameObject 
+	* @param {Array} arr - array of GameObjects 
+	* @returns array of GameObject that the target is within 
+	*/
 const detectHit = (target,arr) => arr.filter( el => 
 	target.x >= el.x &&
 	target.x <= el.x + el.w && 
@@ -36,13 +47,24 @@ const detectHit = (target,arr) => arr.filter( el =>
 	target.y <= el.y + el.h
 )
 
-document.onmousemove = updateMouse
+document.onmousemove = updateMousePos
 document.onmousedown = updateMouseDown
 document.onmouseup = updateMouseUp
 
 // globals
 var frame = 0
-var mouse = {x:0,y:0,down:false,drag:null,click:0}
+var mouse = {
+	clickX:false,
+	clickY:false,
+	x:0,
+	y:0,
+	down:false,
+	drag:false,
+	dragXDist:0,
+	dragYDist:0,
+	clickdown:0,
+	clickup:0
+}
 
 /**
  * higher index cards are higher z-order (closer to you)
@@ -77,6 +99,27 @@ const cls = () => {
 	$ctx.fillRect(0,0,$cv.width,$cv.height)
 	$ctx.closePath()
 	$ctx.fill()
+}
+
+const updateMouse = () => {
+	checkClick()
+	checkDrag()
+}
+
+/**
+	* Check if we have just clicked on a card
+	* and trigger applicable effects.
+	*/
+const checkClick = () => {
+
+}
+
+/**
+	* Check if we are dragging a card and trigger
+	* applicable effects.
+	*/
+const checkDrag = () => {
+ 
 }
 
 const checkMouse = () => {
@@ -152,7 +195,7 @@ const drawCards = () => {
 const update = () => {
 	frame++
 	// update logic
-	checkMouse()
+
 	// draw updates
 	draw()
 }
@@ -181,11 +224,13 @@ class Card {
 		this.y = 0
 		this.yoffset = 0
 		this.click = -1
+		// assign all props
 		Object.keys(opts).forEach(k => this[k] = opts[k])
+		// add to cards
 		cards.push(this)
 	}
 	/**
-	 * 
+	 * Used for hit detection
 	 * @returns center point of card
 	 */
 	centroid(){
